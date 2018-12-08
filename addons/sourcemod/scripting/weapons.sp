@@ -1,17 +1,17 @@
 /*  CS:GO Weapons&Knives SourceMod Plugin
  *
  *  Copyright (C) 2017 Kağan 'kgns' Üstüngel
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) 
+ * Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with 
+ * You should have received a copy of the GNU General Public License along with
  * this program. If not, see http://www.gnu.org/licenses/.
  */
 
@@ -32,19 +32,19 @@
 #include "weapons/config.sp"
 #include "weapons/menus.sp"
 
-public Plugin myinfo = 
+public Plugin myinfo =
 {
-	name = "Weapons & Knives",
-	author = "kgns | oyunhost.net",
-	description = "All in one custom weapon management",
-	version = "1.3.1",
-	url = "https://www.oyunhost.net"
+	name = "Weapons & Knives modified for onetap",
+	author = "morpig x kgns",
+	description = "allinone skins & knife management plugin",
+	version = "1.2.1",
+	url = "https://onetap.gg"
 };
 
 public void OnPluginStart()
 {
 	LoadTranslations("weapons.phrases");
-	
+
 	g_Cvar_DBConnection 			= CreateConVar("sm_weapons_db_connection", 			"storage-local", 	"Database connection name in databases.cfg to use");
 	g_Cvar_TablePrefix 				= CreateConVar("sm_weapons_table_prefix", 			"", 				"Prefix for database table (example: 'xyz_')");
 	g_Cvar_ChatPrefix 				= CreateConVar("sm_weapons_chat_prefix", 			"[oyunhost.net]", 	"Prefix for chat messages");
@@ -56,20 +56,21 @@ public void OnPluginStart()
 	g_Cvar_EnableWeaponOverwrite 	= CreateConVar("sm_weapons_enable_overwrite", 		"1", 				"Enable/Disable players overwriting other players' weapons (picked up from the ground) by using !ws command");
 	g_Cvar_GracePeriod 				= CreateConVar("sm_weapons_grace_period", 			"0", 				"Grace period in terms of seconds counted after round start for allowing the use of !ws command. 0 means no restrictions");
 	g_Cvar_InactiveDays 			= CreateConVar("sm_weapons_inactive_days", 			"30", 				"Number of days before a player (SteamID) is marked as inactive and his data is deleted. (0 or any negative value to disable deleting)");
+	g_Cvar_InactiveDays 			= CreateConVar("sm_weapons_inactive_days", 			"30", 				"Number of days before a player (SteamID) is marked as inactive and his data is deleted. (0 or any negative value to disable deleting)");
+	g_Cvar_EnableDeathmatchMode			= CreateConVar("sm_weapons_enable_deathmatch", 			"0", 				"Enable/Disable deathmatch mode");
 	
 	AutoExecConfig(true, "weapons");
-	
+
 	RegConsoleCmd("buyammo1", CommandWeaponSkins);
 	RegConsoleCmd("sm_ws", CommandWeaponSkins);
 	RegConsoleCmd("buyammo2", CommandKnife);
 	RegConsoleCmd("sm_knife", CommandKnife);
 	RegConsoleCmd("sm_nametag", CommandNameTag);
 	RegConsoleCmd("sm_wslang", CommandWSLang);
-	
+
 	PTaH(PTaH_GiveNamedItemPre, Hook, GiveNamedItemPre);
 	PTaH(PTaH_GiveNamedItem, Hook, GiveNamedItem);
-	PTaH(PTaH_WeaponCanUse, Hook, WeaponCanUse);
-	
+
 	AddCommandListener(ChatListener, "say");
 	AddCommandListener(ChatListener, "say2");
 	AddCommandListener(ChatListener, "say_team");
@@ -177,7 +178,7 @@ void SetWeaponProps(int client, int entity)
 void RefreshWeapon(int client, int index, bool defaultKnife = false)
 {
 	int size = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-	
+
 	for (int i = 0; i < size; i++)
 	{
 		int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
@@ -194,12 +195,12 @@ void RefreshWeapon(int client, int index, bool defaultKnife = false)
 						return;
 					}
 				}
-				
+
 				int clip = -1;
 				int ammo = -1;
 				int offset = -1;
 				int reserve = -1;
-				
+
 				if (!isKnife)
 				{
 					offset = FindDataMapInfo(client, "m_iAmmo") + (GetEntProp(weapon, Prop_Data, "m_iPrimaryAmmoType") * 4);
@@ -207,10 +208,10 @@ void RefreshWeapon(int client, int index, bool defaultKnife = false)
 					clip = GetEntProp(weapon, Prop_Send, "m_iClip1");
 					reserve = GetEntProp(weapon, Prop_Send, "m_iPrimaryReserveAmmoCount");
 				}
-				
+
 				RemovePlayerItem(client, weapon);
 				AcceptEntityInput(weapon, "KillHierarchy");
-				
+
 				if (!isKnife)
 				{
 					weapon = GivePlayerItem(client, g_WeaponClasses[index]);
@@ -247,7 +248,7 @@ public Action ReserveAmmoTimer(Handle timer, DataPack pack)
 	int clientIndex = GetClientOfUserId(pack.ReadCell());
 	int offset = pack.ReadCell();
 	int ammo = pack.ReadCell();
-	
+
 	if(clientIndex > 0 && IsClientInGame(clientIndex))
 	{
 		SetEntData(clientIndex, offset, ammo, 4, true);
