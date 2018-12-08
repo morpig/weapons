@@ -1,17 +1,17 @@
 /*  CS:GO Weapons&Knives SourceMod Plugin
  *
  *  Copyright (C) 2017 Kağan 'kgns' Üstüngel
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) 
+ * Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with 
+ * You should have received a copy of the GNU General Public License along with
  * this program. If not, see http://www.gnu.org/licenses/.
  */
 
@@ -69,19 +69,19 @@ public Action ChatListener(int client, const char[] command, int args)
 	else if (g_bWaitingForNametag[client] && IsValidClient(client) && g_iIndex[client] > -1 && !IsChatTrigger())
 	{
 		CleanNameTag(nameTag, sizeof(nameTag));
-		
+
 		g_bWaitingForNametag[client] = false;
-		
+
 		if (StrEqual(nameTag, "!cancel") || StrEqual(nameTag, "!iptal"))
 		{
 			PrintToChat(client, " %s\x02 %t", g_ChatPrefix, "NameTagCancelled");
 			return Plugin_Handled;
 		}
-		
+
 		g_NameTag[client][g_iIndex[client]] = nameTag;
-		
+
 		RefreshWeapon(client, g_iIndex[client]);
-		
+
 		char updateFields[1024];
 		char escaped[257];
 		db.Escape(nameTag, escaped, sizeof(escaped));
@@ -91,9 +91,9 @@ public Action ChatListener(int client, const char[] command, int args)
 		RemoveWeaponPrefix(weaponClass, weaponName, sizeof(weaponName));
 		Format(updateFields, sizeof(updateFields), "%s_tag = '%s'", weaponName, escaped);
 		UpdatePlayerData(client, updateFields);
-		
+
 		PrintToChat(client, " %s \x04%t: \x01\"%s\"", g_ChatPrefix, "NameTagSuccess", nameTag);
-		
+
 		/* NAMETAGCOLOR
 		int menuTime;
 		if((menuTime = GetRemainingGracePeriodSeconds(client)) >= 0)
@@ -101,10 +101,10 @@ public Action ChatListener(int client, const char[] command, int args)
 			CreateColorsMenu(client).Display(client, menuTime);
 		}
 		*/
-	
+
 		return Plugin_Handled;
 	}
-	
+
 	return Plugin_Continue;
 }
 
@@ -112,28 +112,28 @@ public Action OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float
 {
 	if (float(GetClientHealth(victim)) - damage > 0.0)
 		return Plugin_Continue;
-		
+
 	if (!(damagetype & DMG_SLASH) && !(damagetype & DMG_BULLET))
 		return Plugin_Continue;
-		
+
 	if (!IsValidClient(attacker))
 		return Plugin_Continue;
-		
+
 	if (!IsValidWeapon(weapon))
 		return Plugin_Continue;
-		
+
 	int index = GetWeaponIndex(weapon);
-	
+
 	if (index != -1 && g_iSkins[attacker][index] != 0 && g_iStatTrak[attacker][index] != 1)
 		return Plugin_Continue;
-		
+
 	if (GetEntProp(weapon, Prop_Send, "m_nFallbackStatTrak") == -1)
 		return Plugin_Continue;
-		
+
 	int previousOwner;
 	if ((previousOwner = GetEntPropEnt(weapon, Prop_Send, "m_hPrevOwner")) != INVALID_ENT_REFERENCE && previousOwner != attacker)
 		return Plugin_Continue;
-	
+
 	g_iStatTrakCount[attacker][index]++;
 	/*
 	if (IsKnife(weapon))
@@ -161,7 +161,7 @@ public void OnRoundStart(Handle event, const char[] name, bool dontBroadcast)
 
 public bool WeaponCanUse(int client, int weapon, bool pickup)
 {
-	if (IsValidClient(client) && IsKnife(weapon))
+	if (g_bEnableDeathmatchMode && IsValidClient(client) && IsKnife(weapon))
 		return true;
 	return pickup;
 }
