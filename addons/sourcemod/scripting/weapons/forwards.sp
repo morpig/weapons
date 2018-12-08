@@ -1,17 +1,17 @@
 /*  CS:GO Weapons&Knives SourceMod Plugin
  *
  *  Copyright (C) 2017 Kağan 'kgns' Üstüngel
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option) 
+ * Software Foundation, either version 3 of the License, or (at your option)
  * any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with 
+ * You should have received a copy of the GNU General Public License along with
  * this program. If not, see http://www.gnu.org/licenses/.
  */
 
@@ -20,13 +20,13 @@ public void OnConfigsExecuted()
 	GetConVarString(g_Cvar_DBConnection, g_DBConnection, sizeof(g_DBConnection));
 	GetConVarString(g_Cvar_TablePrefix, g_TablePrefix, sizeof(g_TablePrefix));
 	g_iGraceInactiveDays = g_Cvar_InactiveDays.IntValue;
-	
+
 	if(g_DBConnectionOld[0] != EOS && strcmp(g_DBConnectionOld, g_DBConnection) != 0 && db != null)
 	{
 		delete db;
 		db = null;
 	}
-	
+
 	if(db == null)
 	{
 		Database.Connect(SQLConnectCallback, g_DBConnection);
@@ -35,9 +35,9 @@ public void OnConfigsExecuted()
 	{
 		DeleteInactivePlayerData();
 	}
-	
+
 	strcopy(g_DBConnectionOld, sizeof(g_DBConnectionOld), g_DBConnection);
-	
+
 	g_Cvar_ChatPrefix.GetString(g_ChatPrefix, sizeof(g_ChatPrefix));
 	g_iKnifeStatTrakMode = g_Cvar_KnifeStatTrakMode.IntValue;
 	g_bEnableFloat = g_Cvar_EnableFloat.BoolValue;
@@ -47,6 +47,7 @@ public void OnConfigsExecuted()
 	g_iFloatIncrementPercentage = RoundFloat(g_fFloatIncrementSize * 100.0);
 	g_bOverwriteEnabled = g_Cvar_EnableWeaponOverwrite.BoolValue;
 	g_iGracePeriod = g_Cvar_GracePeriod.IntValue;
+	g_bEnableDeathmatchMode = g_Cvar_EnableDeathmatchMode.BoolValue;
 	if(g_iGracePeriod > 0)
 	{
 		HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
